@@ -1,3 +1,5 @@
+package Lesson_6;
+
 import Lesson_6.EchoConstants;
 
 import java.io.DataInputStream;
