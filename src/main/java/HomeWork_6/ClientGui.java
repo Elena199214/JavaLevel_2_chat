@@ -125,7 +125,7 @@ public class ClientGui extends JFrame {
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
                 try {
-                    out.writeUTF("/end");
+                    out.writeUTF(Constants.STOP_WORD2);
                     closeConnection();
                 } catch (IOException exc) {
                     exc.printStackTrace();

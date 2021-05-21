@@ -24,24 +24,20 @@ public class ServerConsole {
                 try {
                     while (true) {
                         String str = in.readUTF();
-                        // System.out.println("Client request: " + str);
                         if (str.equals(Constants.STOP_WORD2)) {
                             break;
-                        }
-                        if (str.equals(Constants.STOP_WORD2)) {
-                            System.out.println("Sending /end to the client.");
-                            out.writeUTF("/end");
                         }
                         else {
                             out.writeUTF("Клиент: " + str);
 
                             System.out.println("Клиент: " + str);
-                            //System.out.println("Ответ клиенту:");
                         }
                     }
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+                System.out.println("Клиент отключился от сервера");
+
             });
 
             Thread serverVoice = new Thread(() -> {
@@ -51,9 +47,7 @@ public class ServerConsole {
                         if (serverMessage.equals(Constants.STOP_WORD2)) {
                             break;
 
-//                            out.writeUTF("Сервер: ");
-//                           // System.out.println("Ответ от сервера: ");
-//                            System.out.println("Сервер: ");
+
                         } else {
                             out.writeUTF("Сервер: " + serverMessage);
                             //System.out.println("Ответ от сервера: ");
