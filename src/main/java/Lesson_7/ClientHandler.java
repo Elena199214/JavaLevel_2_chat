@@ -3,9 +3,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Обслуживает клиента (отвечает за связь между клиентом и сервером)
@@ -23,6 +21,11 @@ public class ClientHandler {
         return name;
     }
 
+//    long startTime = System.currentTimeMillis();
+//    long elapsedTime = 0L;
+
+
+
     public ClientHandler(MyServer server, Socket socket) {
         try {
             this.server = server;
@@ -32,8 +35,14 @@ public class ClientHandler {
             this.name = "";
             new Thread(() -> {
                 try {
-                    authentification();
+                  //  while (elapsedTime <0.5 * 60 * 1000) {
+                        authentification();
+                   //     break;
+                   // }
+
                     readMessages();
+
+                    //иначе brake
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {

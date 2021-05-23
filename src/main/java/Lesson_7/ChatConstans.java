@@ -4,7 +4,7 @@ public class ChatConstans {
 
     public static final String HOST = "localhost";
 
-    public static final int PORT = 8189;
+    public static final int PORT = 8187;
 
     public static final String AUTH_COMMAND = "/auth";
 

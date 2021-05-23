@@ -50,7 +50,7 @@ public class BaseAuthService implements AuthService {
         @Override
         public Optional<String> getNickByLoginAndPass (String login, String pass){
             return entries.stream()
-                    .filter(entry -> entry.login.equals(login) && entry.pass.equals(pass))
+                    .filter(entry -> entry.login.equals(login) && entry.pass.equals(pass))// и если прошло не 120
                     .map(entry -> entry.nick)
                     .findFirst();
        /* for (Entry entry : entries) {
