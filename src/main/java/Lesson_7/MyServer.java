@@ -72,6 +72,10 @@ public class MyServer {
         }*/
     }
 
+    /**
+     *
+     * Метод отправки в личку
+     */
     public synchronized void broadcastMessageToClients(String message, List<String> nicknames) {
         clients.stream()
                 .filter(c -> nicknames.contains(c.getName()))
