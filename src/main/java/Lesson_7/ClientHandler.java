@@ -52,13 +52,16 @@ public class ClientHandler {
             System.out.println("от " + name + ": " + messageFromClient);
             if (messageFromClient.equals(ChatConstans.STOP_WORD)) {
                 return;
-            } else if (messageFromClient.startsWith(ChatConstans.SEND_TO_LIST)) {
+            } else if (messageFromClient.startsWith(ChatConstans.SEND_TO_LIST)||(messageFromClient.startsWith(ChatConstans.SEND_TO_ONE_CLIENT))) {
                 String[] splittedStr = messageFromClient.split("\\s+");
                 List<String> nicknames = new ArrayList<>();
                 for (int i = 1; i < splittedStr.length - 1; i++) {
-                    nicknames.add(splittedStr[i]);
-                }
-            } else if (messageFromClient.startsWith(ChatConstans.CLIENTS_LIST)) {
+                    nicknames.add(splittedStr[i]);}
+                    nicknames.add(this.name);
+
+                server.broadcastMessageToClients(messageFromClient,nicknames);
+        }
+             else if (messageFromClient.startsWith(ChatConstans.CLIENTS_LIST)) {
                 server.broadcastClients();
             } else {
                 server.broadcastMessage("[" + name + "]: " + messageFromClient);
