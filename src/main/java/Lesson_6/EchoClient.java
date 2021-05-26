@@ -1,5 +1,5 @@
 package Lesson_6;
-import Lesson_7.ChatConstans;
+import Lesson_7.ChatConstants;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
@@ -42,7 +42,7 @@ public class EchoClient extends JFrame {
     }
 
     private void openConnection() throws IOException {
-        socket = new Socket(ChatConstans.HOST, ChatConstans.PORT);
+        socket = new Socket(ChatConstants.HOST, ChatConstants.PORT);
         inputStream = new DataInputStream(socket.getInputStream());
         outputStream = new DataOutputStream(socket.getOutputStream());
 
