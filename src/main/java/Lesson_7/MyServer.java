@@ -70,12 +70,7 @@ public class MyServer {
         clients.stream()
                 .filter(c -> nicknames.contains(c.getName()))
                 .forEach(c -> c.sendMsg(message));
-        /*for (ClientHandler client : clients) {
-            if (!nicknames.contains(client.getName())) {
-              continue;
-            }
-            client.sendMsg(message);
-        }*/
+
     }
     public synchronized void broadcastClients() {
         String clientsMessage = ChatConstants.CLIENTS_LIST +

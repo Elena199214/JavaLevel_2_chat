@@ -23,10 +23,6 @@ public class BaseAuthService implements AuthService {
     private List<Entry> entries;
 
     public BaseAuthService() {
-//        entries = new ArrayList<>();
-//        entries.add(new Entry("nick1","login1","pass1"));
-//        entries.add(new Entry("nick2","login2","pass2"));
-//        entries.add(new Entry("nick3","login3","pass3"));
         entries = List.of(
                 new Entry("nick1", "login1", "pass1"),
                 new Entry("nick2", "login2", "pass2"),
@@ -37,8 +33,6 @@ public class BaseAuthService implements AuthService {
 
     @Override
     public void start() {
-
-
     }
 
     @Override
@@ -46,19 +40,12 @@ public class BaseAuthService implements AuthService {
         System.out.println(this.getClass().getName() + " server stopped");
     }
 
-
-        @Override
-        public Optional<String> getNickByLoginAndPass (String login, String pass){
+    @Override
+    public Optional<String> getNickByLoginAndPass (String login, String pass){
             return entries.stream()
-                    .filter(entry -> entry.login.equals(login) && entry.pass.equals(pass))// и если прошло не 120
+                    .filter(entry -> entry.login.equals(login) && entry.pass.equals(pass))
                     .map(entry -> entry.nick)
                     .findFirst();
-       /* for (Entry entry : entries) {
-            if (entry.login.equals(login) && entry.pass.equals(pass)) {
-                return entry.nick;
-            }
-        }*/
-            //return null;
         }
     }
 

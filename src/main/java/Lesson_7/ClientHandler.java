@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Обслуживает клиента (отвечает за связь между клиентом и сервером)
  */
@@ -15,7 +17,8 @@ public class ClientHandler {
     private Socket socket;
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
-    private String name;
+    private volatile boolean isAuth;
+    private String name; // ник пользователя
     public String getName() {
         return name;
     }
@@ -36,6 +39,24 @@ public class ClientHandler {
                     closeConnection();
                 }
             }).start();
+
+            // убить через 120 сек, если не авторизовался
+            Thread killThread = new Thread(() -> {
+                try{
+                    TimeUnit.SECONDS.sleep(120);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if(!isAuth) {
+                    try{
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            killThread.start();
+
         } catch (IOException ex) {
             System.out.println("Проблема при создании клиента");
         }
@@ -74,8 +95,9 @@ public class ClientHandler {
                     if (!server.isNickBusy(nick.get())) {
                         sendMsg(ChatConstants.AUTH_OK + " " + nick);
                         name = nick.get();
-                        server.subscribe(this);
+                        server.subscribe(this);// добавить пользователя в сервис обмена сообщениями
                         server.broadcastMessage(name + " вошел в чат");
+                        isAuth = true;
                         return;
                     } else {
                         sendMsg("Ник уже используется");
@@ -94,8 +116,9 @@ public class ClientHandler {
         }
     }
     public void closeConnection() {
-        server.unsubscribe(this);
-        server.broadcastMessage(name + " вышел из чата");
+        server.unsubscribe(this);// закрываем соединение с сервером обмена сообщениями
+        server.broadcastMessage(name + " вышел из чата");// сообщение всем авторизованным пользователям: ник вышел из чата
+        //закрываем все открытые потоки
         try {
             inputStream.close();
         } catch (IOException e) {
