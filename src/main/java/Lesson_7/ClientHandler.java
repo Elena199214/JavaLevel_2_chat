@@ -1,4 +1,5 @@
 package Lesson_7;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -6,23 +7,21 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Обслуживает клиента (отвечает за связь между клиентом и сервером)
  */
 public class ClientHandler {
-
     private MyServer server;
     private Socket socket;
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
-
-    private String name;
-
+    private volatile boolean isAuth;
+    private String name; // ник пользователя
     public String getName() {
         return name;
     }
-
     public ClientHandler(MyServer server, Socket socket) {
         try {
             this.server = server;
@@ -39,48 +38,66 @@ public class ClientHandler {
                 } finally {
                     closeConnection();
                 }
-
             }).start();
+
+            // убить через 120 сек, если не авторизовался
+            Thread killThread = new Thread(() -> {
+                try{
+                    TimeUnit.SECONDS.sleep(120);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if(!isAuth) {
+                    try{
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            killThread.start();
+
         } catch (IOException ex) {
             System.out.println("Проблема при создании клиента");
         }
     }
-
     private void readMessages() throws IOException {
         while (true) {
             String messageFromClient = inputStream.readUTF();
             System.out.println("от " + name + ": " + messageFromClient);
-            if (messageFromClient.equals(ChatConstans.STOP_WORD)) {
+            if (messageFromClient.equals(ChatConstants.STOP_WORD)) {
                 return;
-            } else if (messageFromClient.startsWith(ChatConstans.SEND_TO_LIST)) {
+            } else if (messageFromClient.startsWith(ChatConstants.SEND_TO_LIST)||(messageFromClient.startsWith(ChatConstants.SEND_TO_ONE_CLIENT))) {
                 String[] splittedStr = messageFromClient.split("\\s+");
                 List<String> nicknames = new ArrayList<>();
                 for (int i = 1; i < splittedStr.length - 1; i++) {
-                    nicknames.add(splittedStr[i]);
-                }
-            } else if (messageFromClient.startsWith(ChatConstans.CLIENTS_LIST)) {
+                    nicknames.add(splittedStr[i]);}
+                nicknames.add(this.name);
+
+                server.broadcastMessageToClients(messageFromClient,nicknames);
+            }
+            else if (messageFromClient.startsWith(ChatConstants.CLIENTS_LIST)) {
                 server.broadcastClients();
             } else {
                 server.broadcastMessage("[" + name + "]: " + messageFromClient);
             }
-
         }
     }
-
     // /auth login pass
     private void authentification() throws IOException {
         while (true) {
             String message = inputStream.readUTF();
-            if (message.startsWith(ChatConstans.AUTH_COMMAND)) {
+            if (message.startsWith(ChatConstants.AUTH_COMMAND)) {
                 String[] parts = message.split("\\s+");
                 Optional<String> nick = server.getAuthService().getNickByLoginAndPass(parts[1], parts[2]);
                 if (nick.isPresent()) {
                     //проверим, что такого нет
                     if (!server.isNickBusy(nick.get())) {
-                        sendMsg(ChatConstans.AUTH_OK + " " + nick);
+                        sendMsg(ChatConstants.AUTH_OK + " " + nick);
                         name = nick.get();
-                        server.subscribe(this);
+                        server.subscribe(this);// добавить пользователя в сервис обмена сообщениями
                         server.broadcastMessage(name + " вошел в чат");
+                        isAuth = true;
                         return;
                     } else {
                         sendMsg("Ник уже используется");
@@ -91,7 +108,6 @@ public class ClientHandler {
             }
         }
     }
-
     public void sendMsg(String message) {
         try {
             outputStream.writeUTF(message);
@@ -99,10 +115,10 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
-
     public void closeConnection() {
-        server.unsubscribe(this);
-        server.broadcastMessage(name + " вышел из чата");
+        server.unsubscribe(this);// закрываем соединение с сервером обмена сообщениями
+        server.broadcastMessage(name + " вышел из чата");// сообщение всем авторизованным пользователям: ник вышел из чата
+        //закрываем все открытые потоки
         try {
             inputStream.close();
         } catch (IOException e) {
@@ -119,6 +135,4 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
-
-
 }

@@ -1,22 +1,18 @@
 package Lesson_7;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 /**
  * Непосредственно сервер
  */
 public class MyServer {
-
     private List<ClientHandler> clients;
     private AuthService authService;
-
     public MyServer() {
-        try (ServerSocket server = new ServerSocket(ChatConstans.PORT)) {
+        try (ServerSocket server = new ServerSocket(ChatConstants.PORT)) {
             authService = new BaseAuthService();
             authService.start();
             clients = new ArrayList<>();
@@ -26,7 +22,6 @@ public class MyServer {
                 System.out.println("Клиент подключился");
                 new ClientHandler(this, socket);
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -35,11 +30,9 @@ public class MyServer {
             }
         }
     }
-
     public AuthService getAuthService() {
         return authService;
     }
-
     public synchronized boolean isNickBusy(String nick) {
         return clients.stream().anyMatch(client -> client.getName().equals(nick));
        /* for (ClientHandler client : clients) {
@@ -49,17 +42,14 @@ public class MyServer {
         }
         return false;*/
     }
-
     public synchronized void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
         broadcastClients();
     }
-
     public synchronized void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
         broadcastClients();
     }
-
     /**
      * Отправляет сообщение всем пользователям
      *
@@ -72,21 +62,18 @@ public class MyServer {
         }*/
     }
 
+    /**
+     *
+     * Метод отправки в личку
+     */
     public synchronized void broadcastMessageToClients(String message, List<String> nicknames) {
         clients.stream()
                 .filter(c -> nicknames.contains(c.getName()))
                 .forEach(c -> c.sendMsg(message));
 
-        /*for (ClientHandler client : clients) {
-            if (!nicknames.contains(client.getName())) {
-              continue;
-            }
-            client.sendMsg(message);
-        }*/
     }
-
     public synchronized void broadcastClients() {
-        String clientsMessage = ChatConstans.CLIENTS_LIST +
+        String clientsMessage = ChatConstants.CLIENTS_LIST +
                 " " +
                 clients.stream()
                         .map(ClientHandler::getName)
@@ -94,7 +81,4 @@ public class MyServer {
         // /client nick1 nick2 nick3
         clients.forEach(c-> c.sendMsg(clientsMessage));
     }
-
-
-
 }

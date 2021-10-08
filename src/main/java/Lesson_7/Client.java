@@ -1,7 +1,6 @@
-package Lesson_6;
-import Lesson_7.ChatConstants;
-
-import java.awt.BorderLayout;
+package Lesson_7;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
@@ -9,19 +8,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
 
-
-
-public class EchoClient extends JFrame {
+public class Client extends JFrame {
 
     private Socket socket;
 
@@ -32,7 +20,7 @@ public class EchoClient extends JFrame {
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
 
-    public EchoClient() {
+    public Client() {
         try {
             openConnection();
         } catch (IOException e) {
@@ -51,7 +39,7 @@ public class EchoClient extends JFrame {
                 //auth
                 while (true) {
                     String strFromServer = inputStream.readUTF();
-                    if (strFromServer.equals(EchoConstants.AUTH_OK)) {
+                    if (strFromServer.equals(ChatConstants.AUTH_OK)) {
                         break;
                     }
                     chatArea.append(strFromServer);
@@ -60,17 +48,18 @@ public class EchoClient extends JFrame {
                 //read
                 while (true) {
                     String strFromServer = inputStream.readUTF();
-                    if (strFromServer.equals(EchoConstants.STOP_WORD)) {
+                    if (strFromServer.equals(ChatConstants.STOP_WORD)) {
                         break;
-                    } else if (strFromServer.startsWith(EchoConstants.CLIENTS_LIST)) {
-                        chatArea.append("Сейчас онлайн "+ strFromServer);
+                    } else if (strFromServer.startsWith(ChatConstants.CLIENTS_LIST)) {
+                        chatArea.append("Сейчас онлайн " + strFromServer);
                     } else {
                         chatArea.append(strFromServer);
                     }
                     chatArea.append("\n");
                 }
             } catch (IOException ex) {
-                ex.printStackTrace();
+                System.out.println("Fail!");
+                Runtime.getRuntime().exit(0);
             }
         }).start();
     }
@@ -124,7 +113,7 @@ public class EchoClient extends JFrame {
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
                 try {
-                    outputStream.writeUTF(EchoConstants.STOP_WORD);
+                    outputStream.writeUTF(ChatConstants.STOP_WORD);
                     closeConnection();
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -151,7 +140,6 @@ public class EchoClient extends JFrame {
 
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(EchoClient::new);
+        SwingUtilities.invokeLater(Client::new);
     }
-
 }
